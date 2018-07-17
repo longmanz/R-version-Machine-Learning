@@ -43,7 +43,7 @@ net_input <- function(w, X){
     return (X%*%w[-1] + w[1])
 }
 
-# 2.1. a training function of perceptron classifier
+# 2.1. a perceptron classifier
 #  This is a perceptron classifier, which will take in a training set and train 
 #   for a classifier (weights).
 # 
@@ -77,8 +77,50 @@ Perceptron_train <- function(eta = 0.01, n_iter = 10, data = NULL){
 }
 
 
+
+# 2.2. a Adaptive Linear Neuron (Adaline) classifier, version 1. 
+#  This is an Adaline classifier with Gradient Descent, which will take in a training set and train 
+#   for a classifier (weights).
+# 
+# 1. eta: the learning rate
+# 2. n_iter: number of maximum iteration
+# 3. data: a ML_data object that contains X, y, and w. 
+
+AdalineGD_train <- function(eta = 0.01, n_iter = 10, data = NULL){
+    # set the ML_data object's type to perceptron classifier
+    data@type <- "AdalineGD"
+    # initialise the weights
+    data@w <- rep(0, ncol(data@X)+1)
+    
+    # run iteration
+    for(i in 1:n_iter){
+        net_input_val = net_input(data@w, data@X)
+        error = data@y - net_input_val
+        cost = sum((error)^2)*0.5
+        update = eta*sum(t(data@X) %*% error)
+        data@w[-1] = data@w[-1] + update
+        data@w[1] = data@w[1] + eta*sum(error)
+
+        data@errors = c(data@errors, cost)
+    }
+    return (data)
+}
+
+
+
+
+
+
+
+##################################################
+###     3. Predict funtion
+##################################################
+
+# 3.1. This is a predict function. 
+#  It takes a test set and a trained classifier (a trained ML_data object)
+#   and returns the predicted values.
+
 ML_fit <- function(X, data=NULL){
-    # this will take a trained ML_data classifier and a test set, return the predicted outcomes
     if(length(data@type) == 0){
         stop("The input ML_data object has not been trained yet!\n")
     }
