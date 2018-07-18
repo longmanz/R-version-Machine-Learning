@@ -23,10 +23,12 @@ iris2$type <- 1
 iris2[iris2$Species != "setosa", "type"] = -1
 
 # Randomly divide the dataset into two part: training set (80 samples) + test set (20 samples)
-idx <- sample(1:100, size=80)
+idx <- sample(1:50, size=40)
+idx <- c(idx, idx+50)
 
 training <- iris2[idx, ]
 test <- iris2[-idx, ]
+
 
 
 ############################################
@@ -46,10 +48,30 @@ training2 <- training
 training2[,1] <- scale(training2[,1])
 training2[,2] <- scale(training2[,2])
 
+test2 <- test
+test2[,1] <- scale(test2[,1])
+test2[,2] <- scale(test2[,2])
+
+
 iris_ML <- create_ML_data(X = training2[,1:2], y = training2$type)
 # the learning rate (eta) is pretty crucial for Adaline. Please try 0.05, 0.01, 0.005, 0.001 and set the n_iter to 50 
 #  for better convergence.
-iris_ML_3 <- AdalineGD_train(eta = 0.001, n_iter = 50, data = iris_ML)   
+iris_ML_3 <- AdalineGD_train(eta = 0.01, n_iter = 50, data = iris_ML)   
+res <- ML_fit(X = test2[,1:2], data=iris_ML_3)
+sum(res == test2[,4])
+
+# test AdalineSGD
+iris_ML <- create_ML_data(X = training2[,1:2], y = training2$type)
+# the learning rate (eta) is pretty crucial for Adaline. Please try 0.05, 0.01, 0.005, 0.001 and set the n_iter to 50 
+#  for better convergence.
+iris_ML_4 <- AdalineSGD_train(eta = 0.01, n_iter = 50, data = iris_ML)   
+res <- ML_fit(X = test2[,1:2], data=iris_ML_4)
+sum(res == test2[,4])
+
+
+
+
+
 
 
 

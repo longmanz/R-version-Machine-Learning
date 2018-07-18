@@ -97,7 +97,7 @@ AdalineGD_train <- function(eta = 0.01, n_iter = 10, data = NULL){
         net_input_val = net_input(data@w, data@X)
         error = data@y - net_input_val
         cost = sum((error)^2)*0.5
-        update = eta*sum(t(data@X) %*% error)
+        update = eta*t(data@X) %*% error
         data@w[-1] = data@w[-1] + update
         data@w[1] = data@w[1] + eta*sum(error)
 
@@ -108,6 +108,40 @@ AdalineGD_train <- function(eta = 0.01, n_iter = 10, data = NULL){
 
 
 
+# 2.3. a Adaline classifier, version 2. 
+#  This is an Adaline classifier with Stochastic Gradient Descent. 
+#  
+
+AdalineSGD_train <- function(eta = 0.01, n_iter = 10, data = NULL, partial_fit = F, shuffle = T){
+    # set the ML_data object's type to perceptron classifier
+    data@type <- "AdalineSGD"
+    # initialise the weights 
+    if (partial_fit == F | length(data@w) == 0){
+        data@w <- rep(0, ncol(data@X)+1)
+    }
+    
+    # run iteration 
+    for(i in 1:n_iter){
+        if(shuffle == T){
+            idx = sample(1:nrow(data@X), size=nrow(data@X))
+            X = data@X[idx,]
+            y = data@y[idx]
+        }
+        costs = vector()
+        for(j in 1:nrow(X)){
+            net_input_val = net_input(data@w, X[j,])
+            error = y[j] - net_input_val
+            cost = (error)^2*0.5
+            update = eta*(X[j,] %*% error)
+            data@w[-1] = data@w[-1] + update
+            data@w[1] = data@w[1] + eta*error
+            costs = c(costs, cost)
+        }
+        
+        data@errors = c(data@errors, mean(costs) )
+    }
+    return (data)
+}
 
 
 
