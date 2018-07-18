@@ -112,7 +112,7 @@ AdalineGD_train <- function(eta = 0.01, n_iter = 10, data = NULL){
 #  This is an Adaline classifier with Stochastic Gradient Descent. 
 #  
 
-AdalineSGD_train <- function(eta = 0.01, n_iter = 10, data = NULL, partial_fit = F, shuffle = T){
+AdalineSGD_train <- function(eta = 0.01, n_iter = 10, data = NULL, partial_fit = F, shuffle = T, add_X = NULL, add_y = NULL){
     # set the ML_data object's type to perceptron classifier
     data@type <- "AdalineSGD"
     # initialise the weights 
@@ -120,12 +120,36 @@ AdalineSGD_train <- function(eta = 0.01, n_iter = 10, data = NULL, partial_fit =
         data@w <- rep(0, ncol(data@X)+1)
     }
     
-    # run iteration 
-    for(i in 1:n_iter){
+    # Part A. Run iteration from the scratch, i.e. partial_fit == F
+    if(partial_fit == F){
+        for(i in 1:n_iter){
+            if(shuffle == T){
+                idx = sample(1:nrow(data@X), size=nrow(data@X))
+                X = data@X[idx,]
+                y = data@y[idx]
+            }
+            costs = vector()
+            for(j in 1:nrow(X)){
+                net_input_val = net_input(data@w, X[j,])
+                error = y[j] - net_input_val
+                cost = (error)^2*0.5
+                update = eta*(X[j,] %*% error)
+                data@w[-1] = data@w[-1] + update
+                data@w[1] = data@w[1] + eta*error
+                costs = c(costs, cost)
+            }
+            
+            data@errors = c(data@errors, mean(costs) )
+        }
+    } else {
+        # Part B. 
+        # the partial fit function for on-line learning, i.e. the previous data@w is to be kept. 
+        add_X <- as.matrix(add_X)
+        add_y <- as.matrix(add_y)
         if(shuffle == T){
-            idx = sample(1:nrow(data@X), size=nrow(data@X))
-            X = data@X[idx,]
-            y = data@y[idx]
+            idx = sample(1:nrow(add_X), size=nrow(add_X))
+            X = add_X[idx,]
+            y = add_y[idx]
         }
         costs = vector()
         for(j in 1:nrow(X)){
@@ -140,6 +164,8 @@ AdalineSGD_train <- function(eta = 0.01, n_iter = 10, data = NULL, partial_fit =
         
         data@errors = c(data@errors, mean(costs) )
     }
+    
+    
     return (data)
 }
 

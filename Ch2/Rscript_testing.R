@@ -35,14 +35,15 @@ test <- iris2[-idx, ]
 ###           begin to train:
 ############################################
 
-# test Perceptron
+################
+##  A. test Perceptron
 iris_ML <- create_ML_data(X = training[,1:2], y = training$type)
 iris_ML_2 <- Perceptron_train(data = iris_ML)
 res <- ML_fit(X = test[,1:2], data=iris_ML_2)
 sum(res == test[,4])
 
-
-# test AdalineGD
+################
+##  B. test AdalineGD
 iris_ML_3 <- AdalineGD_train(data = iris_ML)  # not good. we will need to run standardisation of the variables.
 training2 <- training
 training2[,1] <- scale(training2[,1])
@@ -60,7 +61,9 @@ iris_ML_3 <- AdalineGD_train(eta = 0.01, n_iter = 50, data = iris_ML)
 res <- ML_fit(X = test2[,1:2], data=iris_ML_3)
 sum(res == test2[,4])
 
-# test AdalineSGD
+
+################
+##  C. test AdalineSGD
 iris_ML <- create_ML_data(X = training2[,1:2], y = training2$type)
 # the learning rate (eta) is pretty crucial for Adaline. Please try 0.05, 0.01, 0.005, 0.001 and set the n_iter to 50 
 #  for better convergence.
@@ -68,8 +71,10 @@ iris_ML_4 <- AdalineSGD_train(eta = 0.01, n_iter = 50, data = iris_ML)
 res <- ML_fit(X = test2[,1:2], data=iris_ML_4)
 sum(res == test2[,4])
 
+# test the partial fit function of AdalineSGD
+iris_ML_5 <- AdalineSGD_train(eta = 0.01, n_iter = 50, data = iris_ML_4, partial_fit = T, add_X = test2[,1:2], add_y = test2[,4])   
 
-
+res <- ML_fit(X = test2[,1:2], data=iris_ML_5)
 
 
 
