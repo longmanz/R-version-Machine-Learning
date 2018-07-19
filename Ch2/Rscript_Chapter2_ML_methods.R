@@ -200,9 +200,9 @@ LogisticReg_train <- function(eta = 0.01, n_iter = 10, data = NULL){
         
         # the cost function is a bit weird, please refer to page 87 of PML,
         # we add a very small values 1e-32 to avoid log(0) and produces NaN
-        cost = -sum(y*log(sigmoid_val + 1e-32)) - sum((1-y)*log(1-sigmoid_val + 1e-32))            
+        cost = -sum(y*log(sigmoid_val )) - sum((1-y)*log(1-sigmoid_val ))            
 
-        inter = ifelse(y == 1, 1/sigmoid_val, -1/(1-sigmoid_val) )
+        inter = y - sigmoid_val
         update = eta*t(inter)%*%data@X
         
         data@w[-1] = data@w[-1] + update
@@ -232,7 +232,7 @@ ML_fit <- function(X, data=NULL){
     cat(paste("The input object is a ", data@type, "classifier.\n"))
     
     net_input_val = net_input(data@w, as.matrix(X) )
-    
+
     if (data@type == "Logistic regression"){
         # the logistic regression requires a different activation function (the sigmoid function)
         inter = sigmoid(net_input_val)

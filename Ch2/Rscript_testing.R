@@ -82,11 +82,20 @@ res <- ML_fit(X = test2[,1:2], data=iris_ML_5)
 iris_ML <- create_ML_data(X = training2[,1:2], y = training2$type)
 # the learning rate (eta) is pretty crucial for Adaline. Please try 0.05, 0.01, 0.005, 0.001 and set the n_iter to 50 
 #  for better convergence.
-iris_ML_6 <- LogisticReg_train(eta = 0.01, n_iter = 200, data = iris_ML)   
+iris_ML_6 <- LogisticReg_train(eta = 0.011, n_iter = 50, data = iris_ML)   
 res <- ML_fit(X = test2[,1:2], data=iris_ML_6)
 sum(res == test2[,4])
 
 # it seems that the average accuracy of LogReg is not very high! There is usually one misspecification.
+
+#' additional note: 
+#'  If you are using glm(..., family="binomial"), then it might failed to converge since the iris data
+#'   we are using is in 'complete seperation'. This is not an ideal situation for logistic glm() to perform. 
+
+
+
+
+
 
 
 
