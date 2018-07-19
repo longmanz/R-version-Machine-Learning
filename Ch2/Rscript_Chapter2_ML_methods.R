@@ -1,4 +1,4 @@
-#' Implementation of Chapter 2 of Python Machine Learning:
+#' Implementation of Chapter 2 of Python Machine Learning (PML):
 #'    1. Perceptron() : Perceptron classifier
 #'    2. AdalineGD()  : Adaptive linear neuron classifier with gradient descent
 #'    3. AdalineSGD() : Adaptive linear neuron classifier with Stochastic gradient descent
@@ -41,6 +41,10 @@ create_ML_data <- function(X = NULL, y = NULL){
 # 2.0.  Create a function to calculate the net_input (wX)
 net_input <- function(w, X){
     return (X%*%w[-1] + w[1])
+}
+
+sigmoid <- function(z){
+    return (1/(1+exp(-z)))
 }
 
 # 2.1. a perceptron classifier
@@ -172,6 +176,47 @@ AdalineSGD_train <- function(eta = 0.01, n_iter = 10, data = NULL, partial_fit =
 
 
 
+# 2.4. Logistic regression classifier. 
+#  This is an logistic regression classifier, which is very similar the the Adaline. 
+#   The only difference is for Adaline, the activation function is just an identity function, 
+#    but for logistic regression, the activation function is a "sigmoid function". 
+# 
+#  Note that the final fit function also requires a different Quantizer.  
+
+LogisticReg_train <- function(eta = 0.01, n_iter = 10, data = NULL){
+    # set the ML_data object's type to logistic regression classifier
+    data@type <- "Logistic regression"
+    # initialise the weights
+    data@w <- rep(0, ncol(data@X)+1)
+    
+    # notice in LogReg the target should be coded as 0 and 1, instead of -1 and 1. 
+    # we need to recode it 
+    y = ifelse(data@y == 1, 1, 0)
+    
+    # run iteration
+    for(i in 1:n_iter){
+        net_input_val = net_input(data@w, data@X)
+        sigmoid_val = sigmoid(net_input_val)    # remember to do this sigmoid transformation
+        
+        # the cost function is a bit weird, please refer to page 87 of PML,
+        # we add a very small values 1e-32 to avoid log(0) and produces NaN
+        cost = -sum(y*log(sigmoid_val + 1e-32)) - sum((1-y)*log(1-sigmoid_val + 1e-32))            
+
+        inter = ifelse(y == 1, 1/sigmoid_val, -1/(1-sigmoid_val) )
+        update = eta*t(inter)%*%data@X
+        
+        data@w[-1] = data@w[-1] + update
+        data@w[1] = data@w[1] + eta*sum(inter)
+        
+        data@errors = c(data@errors, cost)
+    }
+    return (data)
+}
+
+
+
+
+
 ##################################################
 ###     3. Predict funtion
 ##################################################
@@ -187,8 +232,14 @@ ML_fit <- function(X, data=NULL){
     cat(paste("The input object is a ", data@type, "classifier.\n"))
     
     net_input_val = net_input(data@w, as.matrix(X) )
-    res <- rep(1, nrow(X))
-    res[which(net_input_val < 0)] = -1
+    
+    if (data@type == "Logistic regression"){
+        # the logistic regression requires a different activation function (the sigmoid function)
+        inter = sigmoid(net_input_val)
+        res <- ifelse(inter >= 0.5, 1, -1)
+    } else{
+        res <- ifelse(net_input_val < 0, -1, 1)
+    }
     return(res)
 }
 
